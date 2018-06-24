@@ -16,7 +16,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Xabe.FFmpeg;
 using Xabe.FFmpeg.Model;
-
+using System.IO;
 namespace BeatSaver1
 {
     /// <summary>
@@ -28,13 +28,18 @@ namespace BeatSaver1
         public MainWindow()
         {
             InitializeComponent();
+            chartTypes.Items.Add("Easy");
+            chartTypes.Items.Add("Medium");
+            chartTypes.Items.Add("Hard");
+            chartTypes.Items.Add("Expert");
+            chartTypes.Items.Add("ExpertPlus");
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
+            FolderBrowserDialog dlg = new FolderBrowserDialog();
             dlg.ShowDialog();
-            File.Text = dlg.FileName;
+            File.Text = dlg.SelectedPath;
         }
 
         private void Button2_Click(object sender, RoutedEventArgs e)
@@ -52,10 +57,52 @@ namespace BeatSaver1
             }
 
         }
-
+        private string GetOgg(string[] files)
+        {
+            foreach(string s in files)
+            {
+                string s2 = System.IO.Path.GetExtension(s).ToUpper();
+                if (System.IO.Path.GetExtension(s).ToUpper() == ".OGG")
+                {
+                    return s;
+                }
+            }
+            return null;
+        }
+        private string GetChart(string[] files, string chartType)
+        {
+            foreach (string s in files)
+            {
+                string s2 = System.IO.Path.GetExtension(s).ToUpper();
+                if (System.IO.Path.GetFileName(s).ToUpper() == chartType.ToUpper() + ".JSON")
+                {
+                    return s;
+                }
+                string s3 = System.IO.Path.GetFileName(s).ToUpper();
+            }
+            return null;
+        }
+        private string GetInfo(string[] files)
+        {
+            foreach (string s in files)
+            {
+                string s2 = System.IO.Path.GetExtension(s).ToUpper();
+                if (System.IO.Path.GetFileName(s).ToUpper() == "INFO.JSON")
+                {
+                    return s;
+                }
+            }
+            return null;
+        }
         private async void Button_Click_1(object sender, RoutedEventArgs e)
         {
-            var json = System.IO.File.ReadAllText(File.Text);
+            string[] files = Directory.GetFiles(File.Text);
+            
+            string ogg = GetOgg(files);
+            string chart = GetChart(files, "Expert");
+            string info = GetInfo(files);
+            string directoryName = new DirectoryInfo(File.Text).Name;
+            var json = System.IO.File.ReadAllText(chart);
             bsE = JsonConvert.DeserializeObject<BeatSaverEntity>(json);
             System.IO.StreamReader file =
     new System.IO.StreamReader("tffafnotes.txt");
@@ -63,9 +110,9 @@ namespace BeatSaver1
             int counter = 1;
             while ((line = file.ReadLine()) != null)
             {
-                start.Text = line.Split('/')[0];
-                end.Text = line.Split('/')[1];
-                name.Text = "TTFAF - " + counter.ToString() + " " + line.Split('/')[2];
+                string start = line.Split('/')[0];
+                string end = line.Split('/')[1];
+                string name = directoryName + " - " + counter.ToString() + " " + line.Split('/')[2];
 
                 List<EventsEntity> _truncatedEvents = new List<EventsEntity>();
                 List<NotesEntity> _truncatedNotes = new List<NotesEntity>();
@@ -73,58 +120,58 @@ namespace BeatSaver1
                 decimal conversionNum = decimal.Divide(bsE._beatsPerMinute, 60);
                 foreach (EventsEntity e2 in bsE._events)
                 {
-                    if ((e2._time / conversionNum) >= int.Parse(start.Text) - 1 && (e2._time / conversionNum) <= int.Parse(end.Text) + 1)
+                    if ((e2._time / conversionNum) >= int.Parse(start) - 1 && (e2._time / conversionNum) <= int.Parse(end) + 1)
                     {
                         _truncatedEvents.Add(e2);
                     }
                 }
                 foreach (EventsEntity e3 in _truncatedEvents)
                 {
-                    if (decimal.Parse(start.Text) > 1)
+                    if (decimal.Parse(start) > 1)
                     {
-                        e3._time = Math.Round(e3._time - (decimal.Parse(start.Text) - 1) * conversionNum + (conversionNum * 2), 2);
+                        e3._time = Math.Round(e3._time - (decimal.Parse(start) - 1) * conversionNum + (conversionNum * 2), 2);
                     }
                     else
                     {
-                        e3._time = Math.Round(e3._time - (decimal.Parse(start.Text)) * conversionNum, 2);
+                        e3._time = Math.Round(e3._time - (decimal.Parse(start)) * conversionNum, 2);
                     }
 
                 }
                 foreach (NotesEntity n2 in bsE._notes)
                 {
-                    if ((n2._time / conversionNum) >= int.Parse(start.Text) - 1 && (n2._time / conversionNum) <= int.Parse(end.Text) + 1)
+                    if ((n2._time / conversionNum) >= int.Parse(start) - 1 && (n2._time / conversionNum) <= int.Parse(end) + 1)
                     {
                         _truncatedNotes.Add(n2);
                     }
                 }
                 foreach (NotesEntity n3 in _truncatedNotes)
                 {
-                    if (decimal.Parse(start.Text) > 1)
+                    if (decimal.Parse(start) > 1)
                     {
-                        n3._time = Math.Round(n3._time - (decimal.Parse(start.Text) - 1) * conversionNum + (conversionNum * 2), 2);
+                        n3._time = Math.Round(n3._time - (decimal.Parse(start) - 1) * conversionNum + (conversionNum * 2), 2);
                     }
                     else
                     {
-                        n3._time = Math.Round(n3._time - (decimal.Parse(start.Text)) * conversionNum, 2);
+                        n3._time = Math.Round(n3._time - (decimal.Parse(start)) * conversionNum, 2);
                     }
 
                 }
                 foreach (ObstaclesEntity o2 in bsE._obstacles)
                 {
-                    if ((o2._time / conversionNum) >= int.Parse(start.Text) - 1 && (o2._time / conversionNum) <= int.Parse(end.Text) + 1)
+                    if ((o2._time / conversionNum) >= int.Parse(start) - 1 && (o2._time / conversionNum) <= int.Parse(end) + 1)
                     {
                         _truncatedObstacles.Add(o2);
                     }
                 }
                 foreach (ObstaclesEntity o3 in _truncatedObstacles)
                 {
-                    if (decimal.Parse(start.Text) > 1)
+                    if (decimal.Parse(start) > 1)
                     {
-                        o3._time = Math.Round(o3._time - (decimal.Parse(start.Text) - 1) * conversionNum + (conversionNum * 2), 2);
+                        o3._time = Math.Round(o3._time - (decimal.Parse(start) - 1) * conversionNum + (conversionNum * 2), 2);
                     }
                     else
                     {
-                        o3._time = Math.Round(o3._time - (decimal.Parse(start.Text)) * conversionNum, 2);
+                        o3._time = Math.Round(o3._time - (decimal.Parse(start)) * conversionNum, 2);
                     }
 
                 }
@@ -147,24 +194,24 @@ namespace BeatSaver1
                                 {
                                     NullValueHandling = NullValueHandling.Ignore
                                 });
-                var outputPath = output.Text + "/" + name.Text;
+                var outputPath = output.Text + "/" + name;
                 System.IO.Directory.CreateDirectory(outputPath);
-                System.IO.File.WriteAllText(outputPath + "\\Expert.json", newJson);
+                System.IO.File.WriteAllText(outputPath + "\\" + chartTypes.SelectedValue + ".json", newJson);
                 var path = System.IO.Path.GetDirectoryName(File.Text);
                 //System.IO.File.Copy(path + "\\info.json", outputPath + "\\info.json");
-                var json2 = System.IO.File.ReadAllText(path + "\\info.json");
+                var json2 = System.IO.File.ReadAllText(File.Text + "\\info.json");
                 InfoEntity iE = JsonConvert.DeserializeObject<InfoEntity>(json2);
                 List<DifficultyEntity> difficulties = new List<DifficultyEntity>();
                 DifficultyEntity d = new DifficultyEntity();
                 d.difficulty = "Expert";
                 d.difficultyRank = 4;
-                d.audioPath = "TTFAF - " + counter.ToString() + " " + line.Split('/')[2] + ".ogg";
-                d.jsonPath = "Expert.json";
+                d.audioPath = directoryName +" - " + counter.ToString() + " " + line.Split('/')[2] + ".ogg";
+                d.jsonPath = chartTypes.SelectedValue + ".json";
                 d.offset = 0;
                 d.oldOffset = 0;
                 difficulties.Add(d);
                 iE.difficultyLevels = difficulties.ToArray();
-                iE.songName = "TTFAF - " + counter.ToString() + " " + line.Split('/')[2];
+                iE.songName = directoryName + " - " + counter.ToString() + " " + line.Split('/')[2];
                 var newJson2 = JsonConvert.SerializeObject(iE,
                                 Newtonsoft.Json.Formatting.None,
                                 new JsonSerializerSettings
@@ -172,16 +219,16 @@ namespace BeatSaver1
                                     NullValueHandling = NullValueHandling.Ignore
                                 });
                 System.IO.File.WriteAllText(outputPath + "\\info.json", newJson2);
-                System.IO.File.Copy(path + "\\cover.jpg", outputPath + "\\cover.jpg");
+                //System.IO.File.Copy(path + "\\cover.jpg", outputPath + "\\cover.jpg");
 
-                double duration = (double.Parse(end.Text) - double.Parse(start.Text) + 4);
-                if (double.Parse(start.Text) > 1)
+                double duration = (double.Parse(end) - double.Parse(start) + 4);
+                if (double.Parse(start) > 1)
                 {
-                    var result = Conversion.Split(path + "\\TTFAF.ogg", outputPath + "\\" + "TTFAF - " + counter.ToString() + " " + line.Split('/')[2] + ".ogg", TimeSpan.FromSeconds(double.Parse(start.Text) - 3), TimeSpan.FromSeconds(duration)).Start();
+                    var result = Conversion.Split(ogg, outputPath + "\\" + directoryName + " - " + counter.ToString() + " " + line.Split('/')[2] + ".ogg", TimeSpan.FromSeconds(double.Parse(start) - 3), TimeSpan.FromSeconds(duration)).Start();
                 }
                 else
                 {
-                    var result = Conversion.Split(path + "\\TTFAF.ogg", outputPath + "\\" + "TTFAF - " + counter.ToString() + " " + line.Split('/')[2] + ".ogg", TimeSpan.FromSeconds(double.Parse(start.Text)), TimeSpan.FromSeconds(duration)).Start();
+                    var result = Conversion.Split(ogg, outputPath + "\\" + directoryName + " - " + counter.ToString() + " " + line.Split('/')[2] + ".ogg", TimeSpan.FromSeconds(double.Parse(start)), TimeSpan.FromSeconds(duration)).Start();
                 }
                 counter++;
             }
@@ -202,37 +249,37 @@ namespace BeatSaver1
             }
         }
 
-        private void Button_Click_3(object sender, RoutedEventArgs e)
-        {
-            Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
-            dlg.ShowDialog();
-            File_Copy1.Text = dlg.FileName;
-        }
+        //private void Button_Click_3(object sender, RoutedEventArgs e)
+        //{
+        //    Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
+        //    dlg.ShowDialog();
+        //    File_Copy1.Text = dlg.FileName;
+        //}
 
-        private void Button_Click_4(object sender, RoutedEventArgs e)
-        {
-            var json = System.IO.File.ReadAllText(File_Copy1.Text);
-            BeatSaverEntity bsE1 = JsonConvert.DeserializeObject<BeatSaverEntity>(json);
-            decimal conversionNum = decimal.Divide(bsE1._beatsPerMinute, 60);
-            for(int i = 0;i < bsE1._events.Count();i++)
-            {
-                bsE1._events[i]._time = Math.Round(bsE1._events[i]._time + decimal.Parse(SecondsOffset.Text) * conversionNum, 2);
-            }
-            for (int i = 0; i < bsE1._notes.Count(); i++)
-            {
-                bsE1._notes[i]._time = Math.Round(bsE1._notes[i]._time + decimal.Parse(SecondsOffset.Text) * conversionNum, 2);
-            }
-            for (int i = 0; i < bsE1._obstacles.Count(); i++)
-            {
-                bsE1._obstacles[i]._time = Math.Round(bsE1._obstacles[i]._time + decimal.Parse(SecondsOffset.Text) * conversionNum, 2);
-            }
-            var newJson2 = JsonConvert.SerializeObject(bsE1,
-                                Newtonsoft.Json.Formatting.None,
-                                new JsonSerializerSettings
-                                {
-                                    NullValueHandling = NullValueHandling.Ignore
-                                });
-            System.IO.File.WriteAllText(File_Copy1.Text, newJson2);
-        }
+        //private void Button_Click_4(object sender, RoutedEventArgs e)
+        //{
+        //    var json = System.IO.File.ReadAllText(File_Copy1.Text);
+        //    BeatSaverEntity bsE1 = JsonConvert.DeserializeObject<BeatSaverEntity>(json);
+        //    decimal conversionNum = decimal.Divide(bsE1._beatsPerMinute, 60);
+        //    for(int i = 0;i < bsE1._events.Count();i++)
+        //    {
+        //        bsE1._events[i]._time = Math.Round(bsE1._events[i]._time + decimal.Parse(SecondsOffset.Text) * conversionNum, 2);
+        //    }
+        //    for (int i = 0; i < bsE1._notes.Count(); i++)
+        //    {
+        //        bsE1._notes[i]._time = Math.Round(bsE1._notes[i]._time + decimal.Parse(SecondsOffset.Text) * conversionNum, 2);
+        //    }
+        //    for (int i = 0; i < bsE1._obstacles.Count(); i++)
+        //    {
+        //        bsE1._obstacles[i]._time = Math.Round(bsE1._obstacles[i]._time + decimal.Parse(SecondsOffset.Text) * conversionNum, 2);
+        //    }
+        //    var newJson2 = JsonConvert.SerializeObject(bsE1,
+        //                        Newtonsoft.Json.Formatting.None,
+        //                        new JsonSerializerSettings
+        //                        {
+        //                            NullValueHandling = NullValueHandling.Ignore
+        //                        });
+        //    System.IO.File.WriteAllText(File_Copy1.Text, newJson2);
+        //}
     }
 }
