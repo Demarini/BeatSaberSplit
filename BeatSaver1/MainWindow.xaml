@@ -7,15 +7,28 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="350" Width="898">
     <Grid>
-        <Button Content="Create Json" HorizontalAlignment="Left" Margin="223,234,0,0" VerticalAlignment="Top" Width="75" Click="Button_Click_1"/>
+        <Button Content="Create Json" HorizontalAlignment="Left" Margin="215,179,0,0" VerticalAlignment="Top" Width="75" Click="Button_Click_1"/>
         <Button Content="..." HorizontalAlignment="Left" Margin="480,34,0,0" VerticalAlignment="Top" Width="21" Click="Button_Click"/>
-        <TextBox x:Name="File" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="23,34,0,256" TextWrapping="Wrap" Text="" Width="443"/>
-        <Button Content="..." HorizontalAlignment="Left" VerticalAlignment="Top" Margin="475,201,0,0" Width="21" Click="Button_Click_2"/>
-        <TextBox x:Name="output" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="18,201,0,89" TextWrapping="Wrap" Text="" Width="443"/>
-        <TextBlock HorizontalAlignment="Left" Margin="216,180,0,0" TextWrapping="Wrap" Text="Output Path" VerticalAlignment="Top" Width="82"/>
-        <TextBlock HorizontalAlignment="Left" Margin="216,13,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="82"><Run Text="Input Path"/><LineBreak/><Run/></TextBlock>
-        <ComboBox x:Name="chartTypes" HorizontalAlignment="Left" Margin="173,120,0,0" VerticalAlignment="Top" Width="164"/>
-        <TextBlock HorizontalAlignment="Left" Margin="217,88,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="82"><Run Text="Input Path"/><LineBreak/><Run/></TextBlock>
-
+        <TextBox x:Name="File" HorizontalAlignment="Left" Margin="23,34,0,256"  TextWrapping="Wrap" Text="" Width="443"/>
+        <Button Content="..." HorizontalAlignment="Left" Margin="480,97,0,0" VerticalAlignment="Top" Width="21" Click="Button_Click_2"/>
+        <TextBox x:Name="output" HorizontalAlignment="Left" Margin="23,97,0,193" TextWrapping="Wrap" Text="" Width="443"/>
+        <TextBlock HorizontalAlignment="Left" Margin="215,76,0,0" TextWrapping="Wrap" Text="Output Path" VerticalAlignment="Top" Width="82"/>
+        <TextBlock HorizontalAlignment="Left" Margin="215,13,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="82"><Run Text="Input Path"/><LineBreak/><Run/></TextBlock>
+        <Slider x:Name="Slider" HorizontalAlignment="Left" Margin="23,238,0,0" VerticalAlignment="Top" Width="857" DragEnter="Slider_DragEnter" Ticks=""/>
+        <Button x:Name="Play" Content="Play" HorizontalAlignment="Left" Margin="297,290,0,0" VerticalAlignment="Top" Width="75" Click="Play_Click" Height="19"/>
+        <Button x:Name="Pause" Content="Pause" HorizontalAlignment="Left" Margin="393,290,0,0" VerticalAlignment="Top" Width="75" Click="Pause_Click" Height="19"/>
+        <Button x:Name="Stop" Content="Stop" HorizontalAlignment="Left" Margin="501,290,0,0" VerticalAlignment="Top" Width="75" Click="Stop_Click" Height="19"/>
+        <Button x:Name="Cut" Content="Cut Section" HorizontalAlignment="Left" Margin="412,204,0,0" VerticalAlignment="Top" Width="75" Click="Cut_Click" Height="29"/>
+        <Button x:Name="Reset" Content="Reset Sections" HorizontalAlignment="Left" Margin="501,204,0,0" VerticalAlignment="Top" Width="80" Click="Reset_Click" Height="29"/>
+        <TextBox x:Name="output_Copy" HorizontalAlignment="Left" Margin="222,204,0,86" TextWrapping="Wrap" Text="" Width="176"/>
+        <TextBlock HorizontalAlignment="Left" Margin="115,210,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="82"><Run Text="Section Name"/></TextBlock>
+        <TextBox x:Name="output_Copy1" HorizontalAlignment="Left" Margin="436,256,0,34" TextWrapping="Wrap" Text="0:00" Width="113" IsEnabled="False"/>
+        <TextBlock HorizontalAlignment="Left" Margin="332,261,0,0" TextWrapping="Wrap" Text="Song Time" VerticalAlignment="Top" Width="82"/>
+        <ListBox HorizontalAlignment="Left" Height="209" Margin="628,24,0,0" VerticalAlignment="Top" Width="243"/>
+        <TextBlock HorizontalAlignment="Left" Margin="628,3,0,0" TextWrapping="Wrap" Text="Sections" VerticalAlignment="Top" Width="82"/>
+        <ComboBox x:Name="chartTypes" HorizontalAlignment="Left" Margin="294,140,0,0" VerticalAlignment="Top" Width="120"/>
+        <TextBlock HorizontalAlignment="Left" Margin="189,140,0,0" TextWrapping="Wrap" Text="Difficulty Level" VerticalAlignment="Top" Width="82"/>
+        <Canvas HorizontalAlignment="Left" Height="100" Margin="559,76,0,0" VerticalAlignment="Top" Width="100"/>
+        <Canvas x:Name="canvas" HorizontalAlignment="Left" Height="100" Margin="523,46,0,0" VerticalAlignment="Top" Width="100"/>
     </Grid>
 </Window>

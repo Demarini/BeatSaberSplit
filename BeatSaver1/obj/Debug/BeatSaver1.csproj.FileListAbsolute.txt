@@ -348,3 +348,7 @@ C:\Users\Tom\Documents\GitHub\BeatSaberSplit\BeatSaver1\obj\Debug\BeatSaver1.csp
 C:\Users\Tom\Documents\GitHub\BeatSaberSplit\BeatSaver1\obj\Debug\BeatSaver1.csproj.CopyComplete
 C:\Users\Tom\Documents\GitHub\BeatSaberSplit\BeatSaver1\obj\Debug\BeatSaver1.exe
 C:\Users\Tom\Documents\GitHub\BeatSaberSplit\BeatSaver1\obj\Debug\BeatSaver1.pdb
+C:\Users\Tom\Documents\GitHub\BeatSaberSplit\BeatSaver1\bin\Debug\nVLC.dll
+C:\Users\Tom\Documents\GitHub\BeatSaberSplit\BeatSaver1\bin\Debug\OggVorbisEncoder.dll
+C:\Users\Tom\Documents\GitHub\BeatSaberSplit\BeatSaver1\bin\Debug\Vlc.DotNet.Core.dll
+C:\Users\Tom\Documents\GitHub\BeatSaberSplit\BeatSaver1\bin\Debug\Vlc.DotNet.Core.Interops.dll

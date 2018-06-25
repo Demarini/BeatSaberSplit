@@ -17,6 +17,12 @@ using System.Windows.Shapes;
 using Xabe.FFmpeg;
 using Xabe.FFmpeg.Model;
 using System.IO;
+using Declarations;
+using Implementation;
+using Declarations.Media;
+using Declarations.Players;
+using Vlc.DotNet.Core;
+
 namespace BeatSaver1
 {
     /// <summary>
@@ -24,7 +30,10 @@ namespace BeatSaver1
     /// </summary>
     public partial class MainWindow : Window
     {
+        IAudioPlayer player;
         BeatSaverEntity bsE = new BeatSaverEntity();
+        string[] files;
+        
         public MainWindow()
         {
             InitializeComponent();
@@ -40,6 +49,18 @@ namespace BeatSaver1
             FolderBrowserDialog dlg = new FolderBrowserDialog();
             dlg.ShowDialog();
             File.Text = dlg.SelectedPath;
+            files = Directory.GetFiles(File.Text);
+            string ogg = GetOgg(files);
+
+            IMediaPlayerFactory factory = new MediaPlayerFactory();
+            IMedia media = factory.CreateMedia<IMedia>(ogg);
+            player = factory.CreatePlayer<IAudioPlayer>();
+            player.Open(media);
+            player.Events.PlayerPlaying += new EventHandler(Playing);
+            //player.Events.MediaEnded += new EventHandler(Events_MediaEnded);
+            //player.Events.TimeChanged += new EventHandler<TimeChangedEventArgs>(Events_TimeChanged);
+            player.Play();
+            //player.
         }
 
         private void Button2_Click(object sender, RoutedEventArgs e)
@@ -248,7 +269,38 @@ namespace BeatSaver1
                 System.Windows.MessageBox.Show("Error!");
             }
         }
+        private void Play_Click(object sender, RoutedEventArgs e)
+        {
+            player.Play();
+        }
 
+        private void Pause_Click(object sender, RoutedEventArgs e)
+        {
+            player.Stop();
+        }
+
+        private void Stop_Click(object sender, RoutedEventArgs e)
+        {
+            //player.Play()
+        }
+
+        private void Cut_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void Reset_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+        private void Playing(object sender, EventArgs e)
+        {
+
+        }
+        private void Slider_DragEnter(object sender, System.Windows.DragEventArgs e)
+        {
+
+        }
         //private void Button_Click_3(object sender, RoutedEventArgs e)
         //{
         //    Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
