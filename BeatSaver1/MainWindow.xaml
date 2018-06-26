@@ -41,7 +41,7 @@
                             <ColumnDefinition Width="*"></ColumnDefinition>
                         </Grid.ColumnDefinitions>
                         <TextBlock  Margin="10,0,0,0" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" Text="Difficulty Level" Width="82"/>
-                        <ComboBox x:Name="chartTypes" HorizontalAlignment="Right"  VerticalAlignment="Center" Width="120" SelectionChanged="chartTypes_SelectionChanged" ToolTip="i bet you choose easy"/>
+                        <ComboBox x:Name="chartTypes" IsEnabled="false" HorizontalAlignment="Right"  VerticalAlignment="Center" Width="120" SelectionChanged="chartTypes_SelectionChanged" ToolTip="i bet you choose easy"/>
                         <Button x:Name="Create" Content="Create Sections" Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center" Width="101" Click="Button_Click_1" IsEnabled="False" Margin="0,12,0,11"/>
                     </Grid>
                 </Grid>
@@ -74,7 +74,7 @@
                     <Button x:Name="Pause" IsEnabled="False" Content="Pause" HorizontalAlignment="Left"  Grid.Column="1" VerticalAlignment="Center" Width="75" Click="Pause_Click" Height="20" Margin="0,10"/>
                     <Button x:Name="Stop" IsEnabled="False" Content="Reset" HorizontalAlignment="Left"  Grid.Column="2" VerticalAlignment="Center" Width="75" Click="Stop_Click" Height="20" Margin="0,10"/>
                     <Button x:Name="Cut" IsEnabled="False" Content="Cut Section" HorizontalAlignment="Left"  Grid.Column="5" VerticalAlignment="Center" Width="75" Click="Cut_Click" Height="28" Margin="0,6"/>
-                    <TextBox x:Name="output_Copy" TextChanged="output_Copy_TextChanged" IsEnabled="False" HorizontalAlignment="Left"  Grid.Column="4" TextWrapping="Wrap" VerticalAlignment="Center" Text="" Width="199" Height="25"/>
+                    <TextBox x:Name="output_Copy" TextChanged="output_Copy_TextChanged" PreviewTextInput="output_Copy_PreviewTextInput" IsEnabled="False" HorizontalAlignment="Left"  Grid.Column="4" TextWrapping="Wrap" VerticalAlignment="Center" Text="" Width="199" Height="25"/>
                     <TextBlock HorizontalAlignment="Left" Grid.Column="3" TextWrapping="Wrap" VerticalAlignment="Center" Width="82" Text="Section Name:" Height="16" Margin="0,12"/>
                     <TextBox x:Name="output_Copy1"  Margin="6,11,0,11" HorizontalAlignment="Left"  Grid.Column="7" TextWrapping="Wrap" VerticalAlignment="Center" Text="0:00" Width="59" IsEnabled="False" Height="18"/>
                 </Grid>

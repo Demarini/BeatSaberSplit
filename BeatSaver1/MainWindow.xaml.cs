@@ -40,11 +40,6 @@ namespace BeatSaver1
         public MainWindow()
         {
             InitializeComponent();
-            chartTypes.Items.Add("Easy");
-            chartTypes.Items.Add("Medium");
-            chartTypes.Items.Add("Hard");
-            chartTypes.Items.Add("Expert");
-            chartTypes.Items.Add("ExpertPlus");
             t = new Thread(PollVlcControl);
         }
 
@@ -77,6 +72,27 @@ namespace BeatSaver1
             {
                 files = Directory.GetFiles(File.Text);
                 string ogg = GetOgg(files);
+                if(GetChart(files, "Easy") != null)
+                {
+                    chartTypes.Items.Add("Easy");
+                }
+                if (GetChart(files, "Medium") != null)
+                {
+                    chartTypes.Items.Add("Medium");
+                }
+                if (GetChart(files, "Hard") != null)
+                {
+                    chartTypes.Items.Add("Hard");
+                }
+                if (GetChart(files, "Expert") != null)
+                {
+                    chartTypes.Items.Add("Expert");
+                }
+                if (GetChart(files, "ExpertPlus") != null)
+                {
+                    chartTypes.Items.Add("ExpertPlus");
+                }
+                chartTypes.IsEnabled = true;
                 AudioShit3(ogg);
                 CheckCriteriaForEnable();
             }
@@ -465,6 +481,17 @@ namespace BeatSaver1
             c.Name = output_Copy.Text;
             cuts.Add(c);
             section1 = section2;
+            foreach (CutEntity c2 in cuts)
+            {
+                if (c2.Name == output_Copy.Text)
+                {
+                    Cut.IsEnabled = false;
+                }
+                else
+                {
+                    Cut.IsEnabled = true;
+                }
+            }
         }
 
         public static bool InternalCheckIsWow64()
@@ -590,6 +617,17 @@ namespace BeatSaver1
             {
                 Cut.IsEnabled = true;
             }
+            foreach(CutEntity c in cuts)
+            {
+                if(c.Name == output_Copy.Text)
+                {
+                    Cut.IsEnabled = false;
+                }
+                else
+                {
+                    Cut.IsEnabled = true;
+                }
+            }
         }
         private void chartTypes_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
@@ -602,7 +640,18 @@ namespace BeatSaver1
         [Out] out bool wow64Process
     );
 
-        
+        private void output_Copy_PreviewTextInput(object sender, System.Windows.Input.TextCompositionEventArgs e)
+        { 
+            char[] invalids = Path.GetInvalidFileNameChars();
+            char[] invalids2 = Path.GetInvalidPathChars();
+            foreach (char c in e.Text)
+            {
+                if(!char.IsLetter(c) && !char.IsWhiteSpace(c) && c != '_' && !char.IsNumber(c))
+                {
+                    e.Handled = true;
+                }
+            }
+        }
     }
 
 }
