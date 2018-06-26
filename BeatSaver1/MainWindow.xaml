@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:BeatSaver1"
         xmlns:Wpf="clr-namespace:Vlc.DotNet.Wpf;assembly=Vlc.DotNet.Wpf" xmlns:Presentation="clr-namespace:LibVLC.NET.Presentation;assembly=LibVLC.NET.Presentation" x:Class="BeatSaver1.MainWindow"
-        mc:Ignorable="d" Background="LightGray"
+        mc:Ignorable="d" Background="LightGray" Icon="icon.png"
         Title="Beat Saber Split" Height="397.251" Width="1001" ResizeMode="NoResize" ToolTip="this code is so scuffed dont hate on me i just whipped this shit up real quick like and didnt care what the ui looked like">
 
     <Grid>
