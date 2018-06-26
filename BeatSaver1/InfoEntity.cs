@@ -11,7 +11,7 @@ namespace BeatSaver1
         public string songName { get; set; }
         public string songSubName { get; set; }
         public string authorName { get; set; }
-        public int beatsPerMinute { get; set; }
+        public decimal beatsPerMinute { get; set; }
         public decimal previewStartTime { get; set; }
         public decimal previewDuration { get; set; }
         public string coverImagePath { get; set; }

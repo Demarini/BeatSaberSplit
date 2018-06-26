@@ -1,34 +1,114 @@
-﻿<Window x:Class="BeatSaver1.MainWindow"
+﻿<Window
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:BeatSaver1"
-        mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="898">
+        xmlns:Wpf="clr-namespace:Vlc.DotNet.Wpf;assembly=Vlc.DotNet.Wpf" xmlns:Presentation="clr-namespace:LibVLC.NET.Presentation;assembly=LibVLC.NET.Presentation" x:Class="BeatSaver1.MainWindow"
+        mc:Ignorable="d" Background="LightGray"
+        Title="Beat Saber Split" Height="397.251" Width="1001" ResizeMode="NoResize" ToolTip="this code is so scuffed dont hate on me i just whipped this shit up real quick like and didnt care what the ui looked like">
+
     <Grid>
-        <Button Content="Create Json" HorizontalAlignment="Left" Margin="215,179,0,0" VerticalAlignment="Top" Width="75" Click="Button_Click_1"/>
-        <Button Content="..." HorizontalAlignment="Left" Margin="480,34,0,0" VerticalAlignment="Top" Width="21" Click="Button_Click"/>
-        <TextBox x:Name="File" HorizontalAlignment="Left" Margin="23,34,0,256"  TextWrapping="Wrap" Text="" Width="443"/>
-        <Button Content="..." HorizontalAlignment="Left" Margin="480,97,0,0" VerticalAlignment="Top" Width="21" Click="Button_Click_2"/>
-        <TextBox x:Name="output" HorizontalAlignment="Left" Margin="23,97,0,193" TextWrapping="Wrap" Text="" Width="443"/>
-        <TextBlock HorizontalAlignment="Left" Margin="215,76,0,0" TextWrapping="Wrap" Text="Output Path" VerticalAlignment="Top" Width="82"/>
-        <TextBlock HorizontalAlignment="Left" Margin="215,13,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="82"><Run Text="Input Path"/><LineBreak/><Run/></TextBlock>
-        <Slider x:Name="Slider" HorizontalAlignment="Left" Margin="23,238,0,0" VerticalAlignment="Top" Width="857" DragEnter="Slider_DragEnter" Ticks=""/>
-        <Button x:Name="Play" Content="Play" HorizontalAlignment="Left" Margin="297,290,0,0" VerticalAlignment="Top" Width="75" Click="Play_Click" Height="19"/>
-        <Button x:Name="Pause" Content="Pause" HorizontalAlignment="Left" Margin="393,290,0,0" VerticalAlignment="Top" Width="75" Click="Pause_Click" Height="19"/>
-        <Button x:Name="Stop" Content="Stop" HorizontalAlignment="Left" Margin="501,290,0,0" VerticalAlignment="Top" Width="75" Click="Stop_Click" Height="19"/>
-        <Button x:Name="Cut" Content="Cut Section" HorizontalAlignment="Left" Margin="412,204,0,0" VerticalAlignment="Top" Width="75" Click="Cut_Click" Height="29"/>
-        <Button x:Name="Reset" Content="Reset Sections" HorizontalAlignment="Left" Margin="501,204,0,0" VerticalAlignment="Top" Width="80" Click="Reset_Click" Height="29"/>
-        <TextBox x:Name="output_Copy" HorizontalAlignment="Left" Margin="222,204,0,86" TextWrapping="Wrap" Text="" Width="176"/>
-        <TextBlock HorizontalAlignment="Left" Margin="115,210,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="82"><Run Text="Section Name"/></TextBlock>
-        <TextBox x:Name="output_Copy1" HorizontalAlignment="Left" Margin="436,256,0,34" TextWrapping="Wrap" Text="0:00" Width="113" IsEnabled="False"/>
-        <TextBlock HorizontalAlignment="Left" Margin="332,261,0,0" TextWrapping="Wrap" Text="Song Time" VerticalAlignment="Top" Width="82"/>
-        <ListBox HorizontalAlignment="Left" Height="209" Margin="628,24,0,0" VerticalAlignment="Top" Width="243"/>
-        <TextBlock HorizontalAlignment="Left" Margin="628,3,0,0" TextWrapping="Wrap" Text="Sections" VerticalAlignment="Top" Width="82"/>
-        <ComboBox x:Name="chartTypes" HorizontalAlignment="Left" Margin="294,140,0,0" VerticalAlignment="Top" Width="120"/>
-        <TextBlock HorizontalAlignment="Left" Margin="189,140,0,0" TextWrapping="Wrap" Text="Difficulty Level" VerticalAlignment="Top" Width="82"/>
-        <Canvas HorizontalAlignment="Left" Height="100" Margin="559,76,0,0" VerticalAlignment="Top" Width="100"/>
-        <Canvas x:Name="canvas" HorizontalAlignment="Left" Height="100" Margin="523,46,0,0" VerticalAlignment="Top" Width="100"/>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="2*"></RowDefinition>
+                <RowDefinition Height="1*"></RowDefinition>
+            </Grid.RowDefinitions>
+            <Grid Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"></ColumnDefinition>
+                    <ColumnDefinition Width="*"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"></RowDefinition>
+                        <RowDefinition Height="*"></RowDefinition>
+                        <RowDefinition Height="*"></RowDefinition>
+                        <RowDefinition Height="*"></RowDefinition>
+                        <RowDefinition Height="*"></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <Button Content="How to Use" HorizontalAlignment="Right" Grid.Row="0" VerticalAlignment="Center" Width="120" Click="Button_Click_3" Height="24" ToolTip="bitch"/>
+                    <TextBlock Margin="10,0,0,0" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" Width="56" Height="16"><Run Text="Input Path"/></TextBlock>
+                    <Button Content="..." Grid.Column="0" VerticalAlignment="Center" Grid.Row="1" HorizontalAlignment="Right" Width="25" Click="Button_Click" ToolTip="inputtttttttttttttttttttttt" Height="25"/>
+                    <TextBox x:Name="File" IsEnabled="False" Margin="10,0,0,0" VerticalAlignment="Center" Grid.Row="1" HorizontalAlignment="Left"  TextWrapping="Wrap" Text="" Width="443" Height="25"/>
+                    <Button Content="..." HorizontalAlignment="Right" Grid.Row="3" VerticalAlignment="Center" Width="25" Height="25" Click="Button_Click_2" ToolTip="outputtttttttttttttttttttttttt"/>
+                    <TextBox Margin="10,0,0,0" x:Name="output" IsEnabled="False" HorizontalAlignment="Left" VerticalAlignment="Center" Grid.Row="3" TextWrapping="Wrap" Text="" Width="443" Height="25"/>
+                    <TextBlock Margin="10,0,0,0" HorizontalAlignment="Left" TextWrapping="Wrap" Text="Output Path(Custom Songs Path)" VerticalAlignment="Center" Width="251" Grid.Row="2"/>
+
+                    <Grid Grid.Row="4">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"></ColumnDefinition>
+                            <ColumnDefinition Width="*"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock  Margin="10,0,0,0" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" Text="Difficulty Level" Width="82"/>
+                        <ComboBox x:Name="chartTypes" HorizontalAlignment="Right"  VerticalAlignment="Center" Width="120" SelectionChanged="chartTypes_SelectionChanged" ToolTip="i bet you choose easy"/>
+                        <Button x:Name="Create" Content="Create Sections" Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center" Width="101" Click="Button_Click_1" IsEnabled="False" Margin="0,12,0,11"/>
+                    </Grid>
+                </Grid>
+                <StackPanel Grid.Column="1">
+                    <TextBlock HorizontalAlignment="Center" TextWrapping="Wrap" Text="Sections" VerticalAlignment="Top" Width="52"/>
+                    <ListBox x:Name ="Sections" HorizontalAlignment="Center" Height="194"  VerticalAlignment="Top" Width="336"/>
+
+                </StackPanel>
+
+            </Grid>
+            <Grid Grid.Row="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="25*"/>
+                    <RowDefinition Height="47*"/>
+                    <RowDefinition Height="51*"/>
+                </Grid.RowDefinitions>
+                <Slider x:Name="Slider" IsSnapToTickEnabled="True" IsEnabled="False" HorizontalAlignment="Left"  VerticalAlignment="Center" ValueChanged="Slider_ValueChanged" Width="975" Ticks="" ToolTip="this shit broke and theres like a 99% chance im too lazy to fix it since its good enough." Margin="10,0,0,10" Height="18"/>
+                <Grid Grid.Row="1" Margin="60,0,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="91*"/>
+                        <ColumnDefinition Width="81*"/>
+                        <ColumnDefinition Width="81*"/>
+                        <ColumnDefinition Width="87*"/>
+                        <ColumnDefinition Width="216*"/>
+                        <ColumnDefinition Width="89*"/>
+                        <ColumnDefinition Width="0*"/>
+                        <ColumnDefinition Width="290*"/>
+                    </Grid.ColumnDefinitions>
+                    <Button x:Name="Play"  Margin="10,10,0,10" IsEnabled="False" Content="Play" HorizontalAlignment="Left" VerticalAlignment="Center" Grid.Column="0" Width="75" Click="Play_Click" Height="20"/>
+                    <Button x:Name="Pause" IsEnabled="False" Content="Pause" HorizontalAlignment="Left"  Grid.Column="1" VerticalAlignment="Center" Width="75" Click="Pause_Click" Height="20" Margin="0,10"/>
+                    <Button x:Name="Stop" IsEnabled="False" Content="Reset" HorizontalAlignment="Left"  Grid.Column="2" VerticalAlignment="Center" Width="75" Click="Stop_Click" Height="20" Margin="0,10"/>
+                    <Button x:Name="Cut" IsEnabled="False" Content="Cut Section" HorizontalAlignment="Left"  Grid.Column="5" VerticalAlignment="Center" Width="75" Click="Cut_Click" Height="28" Margin="0,6"/>
+                    <TextBox x:Name="output_Copy" TextChanged="output_Copy_TextChanged" IsEnabled="False" HorizontalAlignment="Left"  Grid.Column="4" TextWrapping="Wrap" VerticalAlignment="Center" Text="" Width="199" Height="25"/>
+                    <TextBlock HorizontalAlignment="Left" Grid.Column="3" TextWrapping="Wrap" VerticalAlignment="Center" Width="82" Text="Section Name:" Height="16" Margin="0,12"/>
+                    <TextBox x:Name="output_Copy1"  Margin="6,11,0,11" HorizontalAlignment="Left"  Grid.Column="7" TextWrapping="Wrap" VerticalAlignment="Center" Text="0:00" Width="59" IsEnabled="False" Height="18"/>
+                </Grid>
+                <Grid Grid.Row="2" Margin="60,0,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="172*"/>
+                        <ColumnDefinition Width="159*"/>
+                        <ColumnDefinition Width="153*"/>
+                        <ColumnDefinition Width="451*"/>
+
+                    </Grid.ColumnDefinitions>
+                    <TextBlock HorizontalAlignment="Left" Grid.Column="0" TextWrapping="Wrap" VerticalAlignment="Center" Width="136" Height="16" Text="Created By dem" Margin="0,12,0,11"/>
+                    <TextBlock HorizontalAlignment="Left" Grid.Column="1" TextWrapping="Wrap" VerticalAlignment="Center" Width="136" Height="16" Text="twitch.tv/dem716" Margin="0,12,0,11"/>
+                    <Grid Grid.Column="2">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock HorizontalAlignment="Left" Grid.Row="0" TextWrapping="Wrap" VerticalAlignment="Center" Width="143" Height="16" Text="i dont use twitter lol" Margin="0,2"/>
+                        <TextBlock HorizontalAlignment="Left" Grid.Row="1" TextWrapping="Wrap" VerticalAlignment="Top" Width="136" Height="16" FontSize="7" Text="but its @demarini71691"/>
+                    </Grid>
+
+                    <TextBlock HorizontalAlignment="Left" Grid.Column="3" TextWrapping="Wrap" VerticalAlignment="Center" Width="414" Height="16" Text="demariniGaming on youtube i upload lots of vids(but not really(but kind of))" RenderTransformOrigin="0.5,0.5" Margin="0,12,0,11"/>
+
+
+                </Grid>
+            </Grid>
+        </Grid>
+
+
+
+
+
+
+
     </Grid>
 </Window>

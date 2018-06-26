@@ -1,27 +1,21 @@
-﻿using Newtonsoft.Json;
+﻿using LibVLC.NET;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Diagnostics;
+using System.IO;
+using System.Runtime.InteropServices;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Forms;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using Xabe.FFmpeg;
-using Xabe.FFmpeg.Model;
-using System.IO;
-using Declarations;
-using Implementation;
-using Declarations.Media;
-using Declarations.Players;
-using Vlc.DotNet.Core;
+//using Declarations;
+//using Implementation;
+//using Declarations.Media;
+//using Declarations.Players;
+//using Vlc.DotNet.Core;
 
 namespace BeatSaver1
 {
@@ -30,10 +24,19 @@ namespace BeatSaver1
     /// </summary>
     public partial class MainWindow : Window
     {
-        IAudioPlayer player;
-        BeatSaverEntity bsE = new BeatSaverEntity();
+        int section1 = 0;
+        int section2 = 0;
+        Stopwatch st = new Stopwatch();
+        int initialMilli = 0;
+        int currentMilli = 0;
+        static bool is64BitProcess = (IntPtr.Size == 8);
+        static bool is64BitOperatingSystem = is64BitProcess || InternalCheckIsWow64();
         string[] files;
-        
+        LibVLC.NET.MediaPlayer vlc = new LibVLC.NET.MediaPlayer();
+        Thread t;
+        int currentTime = 0;
+        bool runThread = false;
+        List<CutEntity> cuts = new List<CutEntity>();
         public MainWindow()
         {
             InitializeComponent();
@@ -42,34 +45,111 @@ namespace BeatSaver1
             chartTypes.Items.Add("Hard");
             chartTypes.Items.Add("Expert");
             chartTypes.Items.Add("ExpertPlus");
+            t = new Thread(PollVlcControl);
+        }
+
+        private void AudioShit2(string path)
+        {
+            LibVLCLibrary library = LibVLCLibrary.Load(null);
+            IntPtr inst, mp, m;
+
+            inst = library.libvlc_new();
+            // Load the VLC engine 
+            m = library.libvlc_media_new_location(inst, "f.mp4"); // Create a new item 
+            mp = library.libvlc_media_player_new_from_media(m);               // Create a media player playing environement 
+            library.libvlc_media_release(m);                                  // No need to keep the media now 
+            library.libvlc_media_player_play(mp);                             // play the media_player 
+            Thread.Sleep(10000);                                              // Let it play a bit 
+            library.libvlc_media_player_stop(mp);                             // Stop playing 
+            library.libvlc_media_player_release(mp);                          // Free the media_player 
+            library.libvlc_release(inst);
+
+            LibVLCLibrary.Free(library);
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
+            runThread = false;
             FolderBrowserDialog dlg = new FolderBrowserDialog();
             dlg.ShowDialog();
             File.Text = dlg.SelectedPath;
-            files = Directory.GetFiles(File.Text);
-            string ogg = GetOgg(files);
-
-            IMediaPlayerFactory factory = new MediaPlayerFactory();
-            IMedia media = factory.CreateMedia<IMedia>(ogg);
-            player = factory.CreatePlayer<IAudioPlayer>();
-            player.Open(media);
-            player.Events.PlayerPlaying += new EventHandler(Playing);
-            //player.Events.MediaEnded += new EventHandler(Events_MediaEnded);
-            //player.Events.TimeChanged += new EventHandler<TimeChangedEventArgs>(Events_TimeChanged);
-            player.Play();
-            //player.
+            if (File.Text != "")
+            {
+                files = Directory.GetFiles(File.Text);
+                string ogg = GetOgg(files);
+                AudioShit3(ogg);
+                CheckCriteriaForEnable();
+            }
         }
+        private void AudioShit3(string path)
+        {
+            vlc.Location = new Uri(path);
+            runThread = true;
+            DoubleCollection dc = new DoubleCollection();
 
+            int loops = 0;
+            while (vlc.Length.TotalSeconds == 0 && loops < 30)
+            {
+                vlc.Volume = 0;
+                vlc.Play();
+                vlc.Pause();
+                var test = vlc.Length.TotalSeconds;
+                loops++;
+                Thread.Sleep(1000);
+            }
+            for (int i = 0; i <= vlc.Length.TotalSeconds; i++)
+            {
+                dc.Add(i);
+            }
+            Slider.TickFrequency = 1;
+            Slider.TickPlacement = System.Windows.Controls.Primitives.TickPlacement.None;
+            Slider.Maximum = vlc.Length.TotalSeconds;
+            if (t.IsAlive)
+            {
+                t.Abort();
+            }
+            t.Start();
+            st.Stop();
+            st.Reset();
+            vlc.Stop();
+            cuts.Clear();
+            Sections.Items.Clear();
+        }
+        private void UpdateSlider()
+        {
+            while (true)
+            {
+                Dispatcher.Invoke(() =>
+                {
+                    if (vlc.Length.TotalSeconds != 0)
+                    {
+                        DoubleCollection dc = new DoubleCollection();
+                        for (int i = 0; i <= vlc.Length.TotalSeconds; i++)
+                        {
+                            dc.Add(i);
+                        }
+                        Slider.Ticks = dc;
+                        Slider.TickPlacement = System.Windows.Controls.Primitives.TickPlacement.TopLeft;
+                        Slider.TickFrequency = 10;
+                        Slider.Maximum = vlc.Length.TotalSeconds;
+                        int loops = 0;
+                        while (vlc.Length.TotalSeconds == 0 && loops < 30)
+                        {
+                            vlc.Pause();
+                            var test = vlc.Length.TotalSeconds;
+                            loops++;
+                            Thread.Sleep(1000);
+                        }
+                    }
+                });
+            }
+        }
         private void Button2_Click(object sender, RoutedEventArgs e)
         {
             //IConversionResult result = await Conversion.Split()
             try
             {
                 var json = System.IO.File.ReadAllText(File.Text);
-                bsE = JsonConvert.DeserializeObject<BeatSaverEntity>(json);
                 System.Windows.MessageBox.Show("Success!");
             }
             catch
@@ -80,7 +160,7 @@ namespace BeatSaver1
         }
         private string GetOgg(string[] files)
         {
-            foreach(string s in files)
+            foreach (string s in files)
             {
                 string s2 = System.IO.Path.GetExtension(s).ToUpper();
                 if (System.IO.Path.GetExtension(s).ToUpper() == ".OGG")
@@ -115,25 +195,29 @@ namespace BeatSaver1
             }
             return null;
         }
-        private async void Button_Click_1(object sender, RoutedEventArgs e)
+        private void CreateChart(string json, string directoryName, string ogg)
         {
-            string[] files = Directory.GetFiles(File.Text);
-            
-            string ogg = GetOgg(files);
-            string chart = GetChart(files, "Expert");
-            string info = GetInfo(files);
-            string directoryName = new DirectoryInfo(File.Text).Name;
-            var json = System.IO.File.ReadAllText(chart);
-            bsE = JsonConvert.DeserializeObject<BeatSaverEntity>(json);
-            System.IO.StreamReader file =
-    new System.IO.StreamReader("tffafnotes.txt");
-            string line;
+            BeatSaverEntity bsE = JsonConvert.DeserializeObject<BeatSaverEntity>(json);
             int counter = 1;
-            while ((line = file.ReadLine()) != null)
+            int i = 0;
+            while (i < cuts.Count)
             {
-                string start = line.Split('/')[0];
-                string end = line.Split('/')[1];
-                string name = directoryName + " - " + counter.ToString() + " " + line.Split('/')[2];
+                string counterString = "";
+                if (counter < 10)
+                {
+                    counterString = "00" + counter.ToString();
+                }
+                else if (counter > 9 && counter < 100)
+                {
+                    counterString = "0" + counter.ToString();
+                }
+                else
+                {
+                    counterString = counter.ToString();
+                }
+                string start = (cuts[i].StartTime / 1000).ToString();
+                string end = (cuts[i].EndTime / 1000).ToString();
+                string name = directoryName + " - " + counterString + " " + cuts[i].Name;
 
                 List<EventsEntity> _truncatedEvents = new List<EventsEntity>();
                 List<NotesEntity> _truncatedNotes = new List<NotesEntity>();
@@ -215,24 +299,32 @@ namespace BeatSaver1
                                 {
                                     NullValueHandling = NullValueHandling.Ignore
                                 });
-                var outputPath = output.Text + "/" + name;
+                var outputPath = output.Text + "\\" + name;
                 System.IO.Directory.CreateDirectory(outputPath);
                 System.IO.File.WriteAllText(outputPath + "\\" + chartTypes.SelectedValue + ".json", newJson);
-                var path = System.IO.Path.GetDirectoryName(File.Text);
+
                 //System.IO.File.Copy(path + "\\info.json", outputPath + "\\info.json");
                 var json2 = System.IO.File.ReadAllText(File.Text + "\\info.json");
                 InfoEntity iE = JsonConvert.DeserializeObject<InfoEntity>(json2);
                 List<DifficultyEntity> difficulties = new List<DifficultyEntity>();
                 DifficultyEntity d = new DifficultyEntity();
-                d.difficulty = "Expert";
+                d.difficulty = chartTypes.SelectedValue.ToString();
                 d.difficultyRank = 4;
-                d.audioPath = directoryName +" - " + counter.ToString() + " " + line.Split('/')[2] + ".ogg";
+                foreach (DifficultyEntity d2 in iE.difficultyLevels)
+                {
+                    if (d2.difficulty.ToUpper() == chartTypes.SelectedValue.ToString().ToUpper())
+                    {
+                        d.difficultyRank = d2.difficultyRank;
+                    }
+                }
+
+                d.audioPath = directoryName + " - " + counterString + " " + cuts[i].Name + ".ogg";
                 d.jsonPath = chartTypes.SelectedValue + ".json";
                 d.offset = 0;
                 d.oldOffset = 0;
                 difficulties.Add(d);
                 iE.difficultyLevels = difficulties.ToArray();
-                iE.songName = directoryName + " - " + counter.ToString() + " " + line.Split('/')[2];
+                iE.songName = directoryName + " - " + counterString + " " + cuts[i].Name;
                 var newJson2 = JsonConvert.SerializeObject(iE,
                                 Newtonsoft.Json.Formatting.None,
                                 new JsonSerializerSettings
@@ -243,17 +335,36 @@ namespace BeatSaver1
                 //System.IO.File.Copy(path + "\\cover.jpg", outputPath + "\\cover.jpg");
 
                 double duration = (double.Parse(end) - double.Parse(start) + 4);
+                
                 if (double.Parse(start) > 1)
                 {
-                    var result = Conversion.Split(ogg, outputPath + "\\" + directoryName + " - " + counter.ToString() + " " + line.Split('/')[2] + ".ogg", TimeSpan.FromSeconds(double.Parse(start) - 3), TimeSpan.FromSeconds(duration)).Start();
+                    var result = Conversion.Split(ogg, outputPath + "\\" + directoryName + " - " + counterString + " " + cuts[i].Name + ".ogg", TimeSpan.FromSeconds(double.Parse(start) - 3), TimeSpan.FromSeconds(duration)).Start();
                 }
                 else
                 {
-                    var result = Conversion.Split(ogg, outputPath + "\\" + directoryName + " - " + counter.ToString() + " " + line.Split('/')[2] + ".ogg", TimeSpan.FromSeconds(double.Parse(start)), TimeSpan.FromSeconds(duration)).Start();
+                    var result = Conversion.Split(ogg, outputPath + "\\" + directoryName + " - " + counterString + " " + cuts[i].Name + ".ogg", TimeSpan.FromSeconds(double.Parse(start)), TimeSpan.FromSeconds(duration)).Start();
                 }
                 counter++;
+                i++;
             }
-            file.Close();
+        }
+
+        private async void Button_Click_1(object sender, RoutedEventArgs e)
+        {
+            vlc.Stop();
+            string[] files = Directory.GetFiles(File.Text);
+
+            string ogg = GetOgg(files);
+            string chart = GetChart(files, "Expert");
+            string info = GetInfo(files);
+            string directoryName = new DirectoryInfo(File.Text).Name;
+            var json = System.IO.File.ReadAllText(chart);
+            CreateChart(json, directoryName, ogg);
+            vlc = new LibVLC.NET.MediaPlayer();
+            Sections.Items.Clear();
+            cuts.Clear();
+            Slider.Value = 0;
+            output_Copy1.Text = "0:00";
         }
 
         private void Button_Click_2(object sender, RoutedEventArgs e)
@@ -263,6 +374,7 @@ namespace BeatSaver1
                 FolderBrowserDialog dlg = new FolderBrowserDialog();
                 dlg.ShowDialog();
                 output.Text = dlg.SelectedPath;
+                CheckCriteriaForEnable();
             }
             catch
             {
@@ -271,67 +383,226 @@ namespace BeatSaver1
         }
         private void Play_Click(object sender, RoutedEventArgs e)
         {
-            player.Play();
+            //player.Play();
+            vlc.Volume = 100;
+            runThread = true;
+            if (!t.IsAlive)
+            {
+                t = new Thread(PollVlcControl);
+                t.Start();
+            }
+            initialMilli = (int)(Slider.Value * 1000);
+            st.Start();
+            vlc.Play();
+
+            currentMilli = (int)(Slider.Value * 1000);
+            //TimeSpan time = TimeSpan.FromMilliseconds(currentMilli);
+            //TimeSpan ts = TimeSpan.FromMilliseconds(60 * currentMilli / 1000);
+            //TimeSpan ts2 = time.Subtract(ts);
+            //vlc.Time = ts2;
+            //int test = vlc.Delay;
         }
 
         private void Pause_Click(object sender, RoutedEventArgs e)
         {
-            player.Stop();
+            //player.Stop();
+            //currentTime = (int)vlc.Time.TotalSeconds;
+            //Slider.Value = currentTime;
+            runThread = false;
+            //t.Abort();
+            st.Stop();
+            st.Reset();
+            vlc.Pause();
+            //Slider.Value = (int)(currentMilli / 1000);
         }
 
         private void Stop_Click(object sender, RoutedEventArgs e)
         {
-            //player.Play()
+            //player.Play()\
+            
+            st.Stop();
+            st.Reset();
+            vlc.Stop();
+            Slider.Value = 0;
+            runThread = false;
+            Sections.Items.Clear();
+            cuts.Clear();
         }
 
         private void Cut_Click(object sender, RoutedEventArgs e)
         {
+            section2 = currentMilli;
 
+            TimeSpan ts = TimeSpan.FromMilliseconds(section1);
+
+            string secondsVal = "";
+            if (ts.Seconds.ToString().Length == 1)
+            {
+                secondsVal = "0" + ts.Seconds.ToString();
+            }
+            else
+            {
+                secondsVal = ts.Seconds.ToString();
+            }
+
+            TimeSpan ts2 = TimeSpan.FromMilliseconds(section2);
+            string secondsVal2 = "";
+            if (ts2.Seconds.ToString().Length == 1)
+            {
+                secondsVal2 = "0" + ts2.Seconds.ToString();
+            }
+            else
+            {
+                secondsVal2 = ts2.Seconds.ToString();
+            }
+
+
+            Sections.Items.Add(output_Copy.Text + " - " + ts.Minutes.ToString() + ":" + secondsVal + "/" + ts2.Minutes.ToString() + ":" + secondsVal2);
+            Create.IsEnabled = true;
+            CutEntity c = new CutEntity();
+            c.StartTime = section1;
+            c.EndTime = section2;
+            c.Name = output_Copy.Text;
+            cuts.Add(c);
+            section1 = section2;
         }
 
-        private void Reset_Click(object sender, RoutedEventArgs e)
+        public static bool InternalCheckIsWow64()
         {
-
+            if ((Environment.OSVersion.Version.Major == 5 && Environment.OSVersion.Version.Minor >= 1) ||
+                Environment.OSVersion.Version.Major >= 6)
+            {
+                using (Process p = Process.GetCurrentProcess())
+                {
+                    bool retVal;
+                    if (!IsWow64Process(p.Handle, out retVal))
+                    {
+                        return false;
+                    }
+                    return retVal;
+                }
+            }
+            else
+            {
+                return false;
+            }
         }
-        private void Playing(object sender, EventArgs e)
+        
+        private void PollVlcControl()
         {
-
+            try
+            {
+                while (runThread)
+                {
+                    Dispatcher.Invoke(() =>
+                    {
+                        if (vlc.State == MediaPlayerState.Playing)
+                        {
+                            currentMilli = (int)(initialMilli + st.ElapsedMilliseconds);
+                            currentTime = (int)(currentMilli / 1000);
+                            Slider.Value = currentTime;
+                            string secondsVal = "";
+                            if (vlc.Time.Seconds.ToString().Length == 1)
+                            {
+                                secondsVal = "0" + vlc.Time.Seconds.ToString();
+                            }
+                            else
+                            {
+                                secondsVal = vlc.Time.Seconds.ToString();
+                            }
+                            //output_Copy2.Text = vlc.Time.TotalMilliseconds.ToString();
+                        }
+                    });
+                    Thread.Sleep(100);
+                }
+            }
+            catch(Exception ex)
+            {
+                //do this eventualyl
+            }
         }
-        private void Slider_DragEnter(object sender, System.Windows.DragEventArgs e)
+
+        private void Slider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
+            if (vlc.State == MediaPlayerState.Playing)
+            {
+                TimeSpan time = TimeSpan.FromMilliseconds(currentMilli);
+                string secondsVal = "";
+                if (time.Seconds.ToString().Length == 1)
+                {
+                    secondsVal = "0" + time.Seconds.ToString();
+                }
+                else
+                {
+                    secondsVal = time.Seconds.ToString();
+                }
+                output_Copy1.Text = time.Minutes + ":" + secondsVal;
 
+                //vlc.Time = time;
+            }
+            else
+            {
+                currentMilli = (int)(Slider.Value * 1000);
+                TimeSpan time = TimeSpan.FromMilliseconds(currentMilli);
+                string secondsVal = "";
+                if (time.Seconds.ToString().Length == 1)
+                {
+                    secondsVal = "0" + time.Seconds.ToString();
+                }
+                else
+                {
+                    secondsVal = time.Seconds.ToString();
+                }
+                output_Copy1.Text = time.Minutes.ToString() + ":" + secondsVal;
+                
+            }
         }
-        //private void Button_Click_3(object sender, RoutedEventArgs e)
-        //{
-        //    Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
-        //    dlg.ShowDialog();
-        //    File_Copy1.Text = dlg.FileName;
-        //}
+        public bool CheckCriteriaForEnable()
+        {
+            if (File.Text != "" && output.Text != "" && chartTypes.SelectedItem!= null)
+            {
+                Play.IsEnabled = true;
+                Pause.IsEnabled = true;
+                Stop.IsEnabled = true;
+                Cut.IsEnabled = false;
+                output_Copy1.IsEnabled = true;
+                Sections.IsEnabled = true;
+                output_Copy.IsEnabled = true;
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        private void Button_Click_3(object sender, RoutedEventArgs e)
+        {
+            HowToUse h = new HowToUse();
+            h.ShowDialog();
+        }
+        private void output_Copy_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+            if (output_Copy.Text == "")
+            {
+                Cut.IsEnabled = false;
+            }
+            else
+            {
+                Cut.IsEnabled = true;
+            }
+        }
+        private void chartTypes_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+            CheckCriteriaForEnable();
+        }
+        [DllImport("kernel32.dll", SetLastError = true, CallingConvention = CallingConvention.Winapi)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool IsWow64Process(
+        [In] IntPtr hProcess,
+        [Out] out bool wow64Process
+    );
 
-        //private void Button_Click_4(object sender, RoutedEventArgs e)
-        //{
-        //    var json = System.IO.File.ReadAllText(File_Copy1.Text);
-        //    BeatSaverEntity bsE1 = JsonConvert.DeserializeObject<BeatSaverEntity>(json);
-        //    decimal conversionNum = decimal.Divide(bsE1._beatsPerMinute, 60);
-        //    for(int i = 0;i < bsE1._events.Count();i++)
-        //    {
-        //        bsE1._events[i]._time = Math.Round(bsE1._events[i]._time + decimal.Parse(SecondsOffset.Text) * conversionNum, 2);
-        //    }
-        //    for (int i = 0; i < bsE1._notes.Count(); i++)
-        //    {
-        //        bsE1._notes[i]._time = Math.Round(bsE1._notes[i]._time + decimal.Parse(SecondsOffset.Text) * conversionNum, 2);
-        //    }
-        //    for (int i = 0; i < bsE1._obstacles.Count(); i++)
-        //    {
-        //        bsE1._obstacles[i]._time = Math.Round(bsE1._obstacles[i]._time + decimal.Parse(SecondsOffset.Text) * conversionNum, 2);
-        //    }
-        //    var newJson2 = JsonConvert.SerializeObject(bsE1,
-        //                        Newtonsoft.Json.Formatting.None,
-        //                        new JsonSerializerSettings
-        //                        {
-        //                            NullValueHandling = NullValueHandling.Ignore
-        //                        });
-        //    System.IO.File.WriteAllText(File_Copy1.Text, newJson2);
-        //}
+        
     }
+
 }
