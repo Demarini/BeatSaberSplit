@@ -652,6 +652,11 @@ namespace BeatSaver1
                 }
             }
         }
+
+        private void Cut_Copy_Click(object sender, RoutedEventArgs e)
+        {
+            System.Diagnostics.Process.Start("https://www.paypal.me/demarini71691");
+        }
     }
 
 }
