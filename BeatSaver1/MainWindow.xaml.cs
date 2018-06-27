@@ -72,7 +72,7 @@ namespace BeatSaver1
             {
                 files = Directory.GetFiles(File.Text);
                 string ogg = GetOgg(files);
-                if(GetChart(files, "Easy") != null)
+                if (GetChart(files, "Easy") != null)
                 {
                     chartTypes.Items.Add("Easy");
                 }
@@ -120,11 +120,15 @@ namespace BeatSaver1
             Slider.TickFrequency = 1;
             Slider.TickPlacement = System.Windows.Controls.Primitives.TickPlacement.None;
             Slider.Maximum = vlc.Length.TotalSeconds;
-            if (t.IsAlive)
+            //if (t.IsAlive)
+            //{
+            //    t.Abort();
+            //}
+            if (!t.IsAlive)
             {
-                t.Abort();
+                t = new Thread(PollVlcControl);
+                t.Start();
             }
-            t.Start();
             st.Stop();
             st.Reset();
             vlc.Stop();
@@ -351,7 +355,7 @@ namespace BeatSaver1
                 //System.IO.File.Copy(path + "\\cover.jpg", outputPath + "\\cover.jpg");
 
                 double duration = (double.Parse(end) - double.Parse(start) + 4);
-                
+
                 if (double.Parse(start) > 1)
                 {
                     var result = Conversion.Split(ogg, outputPath + "\\" + directoryName + " - " + counterString + " " + cuts[i].Name + ".ogg", TimeSpan.FromSeconds(double.Parse(start) - 3), TimeSpan.FromSeconds(duration)).Start();
@@ -379,8 +383,21 @@ namespace BeatSaver1
             vlc = new LibVLC.NET.MediaPlayer();
             Sections.Items.Clear();
             cuts.Clear();
+            Play.IsEnabled = false;
+            Cut.IsEnabled = false;
+            output_Copy.IsEnabled = false;
+            Pause.IsEnabled = false;
+            Stop.IsEnabled = false;
+            File.Text = "";
+            output.Text = "";
+            chartTypes.Items.Clear();
+            chartTypes.SelectedValue = null;
+            chartTypes.IsEnabled = false;
             Slider.Value = 0;
             output_Copy1.Text = "0:00";
+            output_Copy.Text = "";
+            Create.IsEnabled = false;
+            runThread = false;
         }
 
         private void Button_Click_2(object sender, RoutedEventArgs e)
@@ -435,7 +452,7 @@ namespace BeatSaver1
         private void Stop_Click(object sender, RoutedEventArgs e)
         {
             //player.Play()\
-            
+
             st.Stop();
             st.Reset();
             vlc.Stop();
@@ -514,7 +531,7 @@ namespace BeatSaver1
                 return false;
             }
         }
-        
+
         private void PollVlcControl()
         {
             try
@@ -543,7 +560,7 @@ namespace BeatSaver1
                     Thread.Sleep(100);
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 //do this eventualyl
             }
@@ -581,12 +598,12 @@ namespace BeatSaver1
                     secondsVal = time.Seconds.ToString();
                 }
                 output_Copy1.Text = time.Minutes.ToString() + ":" + secondsVal;
-                
+
             }
         }
         public bool CheckCriteriaForEnable()
         {
-            if (File.Text != "" && output.Text != "" && chartTypes.SelectedItem!= null)
+            if (File.Text != "" && output.Text != "" && chartTypes.SelectedItem != null)
             {
                 Play.IsEnabled = true;
                 Pause.IsEnabled = true;
@@ -617,9 +634,9 @@ namespace BeatSaver1
             {
                 Cut.IsEnabled = true;
             }
-            foreach(CutEntity c in cuts)
+            foreach (CutEntity c in cuts)
             {
-                if(c.Name == output_Copy.Text)
+                if (c.Name == output_Copy.Text)
                 {
                     Cut.IsEnabled = false;
                 }
@@ -641,12 +658,12 @@ namespace BeatSaver1
     );
 
         private void output_Copy_PreviewTextInput(object sender, System.Windows.Input.TextCompositionEventArgs e)
-        { 
+        {
             char[] invalids = Path.GetInvalidFileNameChars();
             char[] invalids2 = Path.GetInvalidPathChars();
             foreach (char c in e.Text)
             {
-                if(!char.IsLetter(c) && !char.IsWhiteSpace(c) && c != '_' && !char.IsNumber(c))
+                if (!char.IsLetter(c) && !char.IsWhiteSpace(c) && c != '_' && !char.IsNumber(c))
                 {
                     e.Handled = true;
                 }

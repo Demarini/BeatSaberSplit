@@ -28,7 +28,10 @@
                         <RowDefinition Height="*"></RowDefinition>
                     </Grid.RowDefinitions>
                     <Button Content="How to Use" HorizontalAlignment="Right" Grid.Row="0" VerticalAlignment="Center" Width="120" Click="Button_Click_3" Height="24" ToolTip="bitch"/>
-                    <TextBlock Margin="10,0,0,0" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" Width="56" Height="16"><Run Text="Input Path"/></TextBlock>
+                    <StackPanel Margin="10,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center" Orientation="Horizontal">
+                        <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" Width="56" Height="16"><Run Text="Input Path"/></TextBlock>
+                        <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" Width="286" Height="34" Margin="20,0,10,0"><Run Text="You need vlc media player installed in your Program Files(x86) directory in order for this to work."/></TextBlock>
+                    </StackPanel>
                     <Button Content="..." Grid.Column="0" VerticalAlignment="Center" Grid.Row="1" HorizontalAlignment="Right" Width="25" Click="Button_Click" ToolTip="inputtttttttttttttttttttttt" Height="25"/>
                     <TextBox x:Name="File" IsEnabled="False" Margin="10,0,0,0" VerticalAlignment="Center" Grid.Row="1" HorizontalAlignment="Left"  TextWrapping="Wrap" Text="" Width="443" Height="25"/>
                     <Button Content="..." HorizontalAlignment="Right" Grid.Row="3" VerticalAlignment="Center" Width="25" Height="25" Click="Button_Click_2" ToolTip="outputtttttttttttttttttttttttt"/>
@@ -70,14 +73,14 @@
                         <ColumnDefinition Width="0*"/>
                         <ColumnDefinition Width="290*"/>
                     </Grid.ColumnDefinitions>
-                    <Button x:Name="Play"  Margin="10,10,0,10" IsEnabled="False" Content="Play" HorizontalAlignment="Left" VerticalAlignment="Center" Grid.Column="0" Width="75" Click="Play_Click" Height="20"/>
+                    <Button x:Name="Play" Margin="0,0,10,0"  IsEnabled="False" Content="Play" VerticalAlignment="Center" Grid.Column="0" Click="Play_Click" Height="20"/>
                     <Button x:Name="Pause" IsEnabled="False" Content="Pause" HorizontalAlignment="Left"  Grid.Column="1" VerticalAlignment="Center" Width="75" Click="Pause_Click" Height="20" Margin="0,10"/>
                     <Button x:Name="Stop" IsEnabled="False" Content="Reset" HorizontalAlignment="Left"  Grid.Column="2" VerticalAlignment="Center" Width="75" Click="Stop_Click" Height="20" Margin="0,10"/>
                     <Button x:Name="Cut" IsEnabled="False" Content="Cut Section" HorizontalAlignment="Left"  Grid.Column="5" VerticalAlignment="Center" Width="75" Click="Cut_Click" Height="28" Margin="0,6"/>
                     <TextBox x:Name="output_Copy" TextChanged="output_Copy_TextChanged" PreviewTextInput="output_Copy_PreviewTextInput" IsEnabled="False" HorizontalAlignment="Left"  Grid.Column="4" TextWrapping="Wrap" VerticalAlignment="Center" Text="" Width="199" Height="25"/>
                     <TextBlock HorizontalAlignment="Left" Grid.Column="3" TextWrapping="Wrap" VerticalAlignment="Center" Width="82" Text="Section Name:" Height="16" Margin="0,12"/>
                     <TextBox x:Name="output_Copy1"  Margin="6,11,0,11" HorizontalAlignment="Left"  Grid.Column="7" TextWrapping="Wrap" VerticalAlignment="Center" Text="0:00" Width="59" IsEnabled="False" Height="18"/>
-                    <Button x:Name="Cut_Copy" IsEnabled="True" Content="Donate Pizza Money!" HorizontalAlignment="Right"  Grid.Column="7" VerticalAlignment="Center" Width="124" Click="Cut_Copy_Click" Height="28" Margin="0,0,10,0"/>
+                    <Button x:Name="Cut_Copy" IsEnabled="True" Content="Donate Pizza Money" HorizontalAlignment="Right"  Grid.Column="7" VerticalAlignment="Center" Width="124" Click="Cut_Copy_Click" Height="28" Margin="0,0,10,0"/>
                 </Grid>
                 <Grid Grid.Row="2" Margin="60,0,0,0">
                     <Grid.ColumnDefinitions>
