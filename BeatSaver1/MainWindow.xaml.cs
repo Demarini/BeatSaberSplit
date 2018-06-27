@@ -32,7 +32,7 @@ namespace BeatSaver1
         static bool is64BitProcess = (IntPtr.Size == 8);
         static bool is64BitOperatingSystem = is64BitProcess || InternalCheckIsWow64();
         string[] files;
-        LibVLC.NET.MediaPlayer vlc = new LibVLC.NET.MediaPlayer();
+        LibVLC.NET.MediaPlayer vlc;
         Thread t;
         int currentTime = 0;
         bool runThread = false;
@@ -41,25 +41,20 @@ namespace BeatSaver1
         {
             InitializeComponent();
             t = new Thread(PollVlcControl);
-        }
-
-        private void AudioShit2(string path)
-        {
-            LibVLCLibrary library = LibVLCLibrary.Load(null);
-            IntPtr inst, mp, m;
-
-            inst = library.libvlc_new();
-            // Load the VLC engine 
-            m = library.libvlc_media_new_location(inst, "f.mp4"); // Create a new item 
-            mp = library.libvlc_media_player_new_from_media(m);               // Create a media player playing environement 
-            library.libvlc_media_release(m);                                  // No need to keep the media now 
-            library.libvlc_media_player_play(mp);                             // play the media_player 
-            Thread.Sleep(10000);                                              // Let it play a bit 
-            library.libvlc_media_player_stop(mp);                             // Stop playing 
-            library.libvlc_media_player_release(mp);                          // Free the media_player 
-            library.libvlc_release(inst);
-
-            LibVLCLibrary.Free(library);
+            if(!Directory.Exists("C:\\Program Files (x86)\\VideoLAN"))
+            {
+                DialogResult dialogResult = System.Windows.Forms.MessageBox.Show("We've determined that you do not have VLC Media Player installed. VLC is required in order for this application to function properly. Would you like to install it now? The application may not open and will require relaunch after install.", "Install VLC?", MessageBoxButtons.YesNo);
+                if (dialogResult == System.Windows.Forms.DialogResult.Yes)
+                {
+                    System.Diagnostics.Process.Start("vlc-3.0.3-win32.exe");
+                    System.Windows.Application.Current.Shutdown();
+                }
+                else if (dialogResult == System.Windows.Forms.DialogResult.No)
+                {
+                    System.Windows.Application.Current.Shutdown();
+                }
+            }
+            vlc = new LibVLC.NET.MediaPlayer();
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
@@ -134,35 +129,6 @@ namespace BeatSaver1
             vlc.Stop();
             cuts.Clear();
             Sections.Items.Clear();
-        }
-        private void UpdateSlider()
-        {
-            while (true)
-            {
-                Dispatcher.Invoke(() =>
-                {
-                    if (vlc.Length.TotalSeconds != 0)
-                    {
-                        DoubleCollection dc = new DoubleCollection();
-                        for (int i = 0; i <= vlc.Length.TotalSeconds; i++)
-                        {
-                            dc.Add(i);
-                        }
-                        Slider.Ticks = dc;
-                        Slider.TickPlacement = System.Windows.Controls.Primitives.TickPlacement.TopLeft;
-                        Slider.TickFrequency = 10;
-                        Slider.Maximum = vlc.Length.TotalSeconds;
-                        int loops = 0;
-                        while (vlc.Length.TotalSeconds == 0 && loops < 30)
-                        {
-                            vlc.Pause();
-                            var test = vlc.Length.TotalSeconds;
-                            loops++;
-                            Thread.Sleep(1000);
-                        }
-                    }
-                });
-            }
         }
         private void Button2_Click(object sender, RoutedEventArgs e)
         {
@@ -650,13 +616,6 @@ namespace BeatSaver1
         {
             CheckCriteriaForEnable();
         }
-        [DllImport("kernel32.dll", SetLastError = true, CallingConvention = CallingConvention.Winapi)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool IsWow64Process(
-        [In] IntPtr hProcess,
-        [Out] out bool wow64Process
-    );
-
         private void output_Copy_PreviewTextInput(object sender, System.Windows.Input.TextCompositionEventArgs e)
         {
             char[] invalids = Path.GetInvalidFileNameChars();
@@ -674,6 +633,12 @@ namespace BeatSaver1
         {
             System.Diagnostics.Process.Start("https://www.paypal.me/demarini71691");
         }
+        [DllImport("kernel32.dll", SetLastError = true, CallingConvention = CallingConvention.Winapi)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool IsWow64Process(
+        [In] IntPtr hProcess,
+        [Out] out bool wow64Process
+    );  
     }
 
 }
