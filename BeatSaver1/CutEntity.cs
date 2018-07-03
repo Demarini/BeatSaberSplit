@@ -11,5 +11,6 @@ namespace BeatSaver1
         public int StartTime;
         public int EndTime;
         public string Name;
+        public double speed;
     }
 }

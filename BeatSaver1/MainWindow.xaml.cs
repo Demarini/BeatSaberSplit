@@ -1,9 +1,11 @@
 ﻿using LibVLC.NET;
 using Newtonsoft.Json;
+using NReco.VideoConverter;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -11,6 +13,9 @@ using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Media;
 using Xabe.FFmpeg;
+using Xabe.FFmpeg.Enums;
+using Xabe.FFmpeg.Model;
+using Xabe.FFmpeg.Streams;
 //using Declarations;
 //using Implementation;
 //using Declarations.Media;
@@ -41,7 +46,7 @@ namespace BeatSaver1
         {
             InitializeComponent();
             t = new Thread(PollVlcControl);
-            if(!Directory.Exists("C:\\Program Files (x86)\\VideoLAN"))
+            if (!Directory.Exists("C:\\Program Files (x86)\\VideoLAN"))
             {
                 DialogResult dialogResult = System.Windows.Forms.MessageBox.Show("We've determined that you do not have VLC Media Player installed. VLC is required in order for this application to function properly. Would you like to install it now? The application may not open and will require relaunch after install.", "Install VLC?", MessageBoxButtons.YesNo);
                 if (dialogResult == System.Windows.Forms.DialogResult.Yes)
@@ -181,7 +186,7 @@ namespace BeatSaver1
             }
             return null;
         }
-        private void CreateChart(string json, string directoryName, string ogg)
+        private async Task CreateChartAsync(string json, string directoryName, string ogg)
         {
             BeatSaverEntity bsE = JsonConvert.DeserializeObject<BeatSaverEntity>(json);
             int counter = 1;
@@ -213,6 +218,7 @@ namespace BeatSaver1
                 {
                     if ((e2._time / conversionNum) >= int.Parse(start) - 1 && (e2._time / conversionNum) <= int.Parse(end) + 1)
                     {
+                        //e2._time = e2._time * Convert.ToDecimal(cuts[i].speed);
                         _truncatedEvents.Add(e2);
                     }
                 }
@@ -220,11 +226,11 @@ namespace BeatSaver1
                 {
                     if (decimal.Parse(start) > 1)
                     {
-                        e3._time = Math.Round(e3._time - (decimal.Parse(start) - 1) * conversionNum + (conversionNum * 2), 2);
+                        e3._time = Math.Round(e3._time - (decimal.Parse(start) - 1) * conversionNum + (conversionNum * 2), 2) * Convert.ToDecimal(cuts[i].speed);
                     }
                     else
                     {
-                        e3._time = Math.Round(e3._time - (decimal.Parse(start)) * conversionNum, 2);
+                        e3._time = Math.Round(e3._time - (decimal.Parse(start)) * conversionNum, 2) * Convert.ToDecimal(cuts[i].speed);
                     }
 
                 }
@@ -239,11 +245,11 @@ namespace BeatSaver1
                 {
                     if (decimal.Parse(start) > 1)
                     {
-                        n3._time = Math.Round(n3._time - (decimal.Parse(start) - 1) * conversionNum + (conversionNum * 2), 2);
+                        n3._time = Math.Round(n3._time - (decimal.Parse(start) - 1) * conversionNum + (conversionNum * 2), 2) * Convert.ToDecimal(cuts[i].speed);
                     }
                     else
                     {
-                        n3._time = Math.Round(n3._time - (decimal.Parse(start)) * conversionNum, 2);
+                        n3._time = Math.Round(n3._time - (decimal.Parse(start)) * conversionNum, 2) * Convert.ToDecimal(cuts[i].speed);
                     }
 
                 }
@@ -258,11 +264,11 @@ namespace BeatSaver1
                 {
                     if (decimal.Parse(start) > 1)
                     {
-                        o3._time = Math.Round(o3._time - (decimal.Parse(start) - 1) * conversionNum + (conversionNum * 2), 2);
+                        o3._time = Math.Round(o3._time - (decimal.Parse(start) - 1) * conversionNum + (conversionNum * 2), 2) * Convert.ToDecimal(cuts[i].speed);
                     }
                     else
                     {
-                        o3._time = Math.Round(o3._time - (decimal.Parse(start)) * conversionNum, 2);
+                        o3._time = Math.Round(o3._time - (decimal.Parse(start)) * conversionNum, 2) * Convert.ToDecimal(cuts[i].speed);
                     }
 
                 }
@@ -324,11 +330,44 @@ namespace BeatSaver1
 
                 if (double.Parse(start) > 1)
                 {
-                    var result = Conversion.Split(ogg, outputPath + "\\" + directoryName + " - " + counterString + " " + cuts[i].Name + ".ogg", TimeSpan.FromSeconds(double.Parse(start) - 3), TimeSpan.FromSeconds(duration)).Start();
+                    var result = await Conversion.Split(ogg, outputPath + "\\" + directoryName + " - " + counterString + " " + cuts[i].Name + "TEMP.ogg", TimeSpan.FromSeconds(double.Parse(start) - 3), TimeSpan.FromSeconds(duration)).Start();
+                    IMediaInfo inputFile = await MediaInfo.Get(new FileInfo(outputPath + "\\" + directoryName + " - " + counterString + " " + cuts[i].Name + "TEMP.ogg"));
+
+                    IConversionResult conversionResult = await Conversion.New()
+                    .AddStream(inputFile.AudioStreams.First().SetCodec(AudioCodec.Aac)
+                    .ChangeSpeed(cuts[i].speed))
+                    .SetOutput(outputPath + "\\" + directoryName + " - " + counterString + " " + cuts[i].Name + ".mp4")
+                    .Start();
+
+                    System.IO.File.Delete(outputPath + "\\" + directoryName + " - " + counterString + " " + cuts[i].Name + "TEMP.ogg");
+
+                    var output = new MemoryStream();
+                    var ffMpeg = new FFMpegConverter();
+                    ffMpeg.ConvertMedia(outputPath + "\\" + directoryName + " - " + counterString + " " + cuts[i].Name + ".mp4", outputPath + "\\" + directoryName + " - " + counterString + " " + cuts[i].Name + ".ogg", Format.ogg);
+                    output.Seek(0, SeekOrigin.Begin);
+
+                    System.IO.File.Delete(outputPath + "\\" + directoryName + " - " + counterString + " " + cuts[i].Name + ".mp4");
                 }
                 else
                 {
-                    var result = Conversion.Split(ogg, outputPath + "\\" + directoryName + " - " + counterString + " " + cuts[i].Name + ".ogg", TimeSpan.FromSeconds(double.Parse(start)), TimeSpan.FromSeconds(duration)).Start();
+                    var result = await Conversion.Split(ogg, outputPath + "\\" + directoryName + " - " + counterString + " " + cuts[i].Name + "TEMP.ogg", TimeSpan.FromSeconds(double.Parse(start)), TimeSpan.FromSeconds(duration)).Start();
+                    IMediaInfo inputFile = await MediaInfo.Get(new FileInfo(outputPath + "\\" + directoryName + " - " + counterString + " " + cuts[i].Name + "TEMP.ogg"));
+
+                    IConversionResult conversionResult = await Conversion.New()
+                    .AddStream(inputFile.AudioStreams.First().SetCodec(AudioCodec.Aac)
+                    .ChangeSpeed(cuts[i].speed))
+                    .SetOutput(outputPath + "\\" + directoryName + " - " + counterString + " " + cuts[i].Name + ".mp4")
+                    .Start();
+
+                    System.IO.File.Delete(outputPath + "\\" + directoryName + " - " + counterString + " " + cuts[i].Name + "TEMP.ogg");
+
+                    var output = new MemoryStream();
+                    var ffMpeg = new FFMpegConverter();
+                    ffMpeg.ConvertMedia(outputPath + "\\" + directoryName + " - " + counterString + " " + cuts[i].Name + ".mp4", outputPath + "\\" + directoryName + " - " + counterString + " " + cuts[i].Name + ".ogg", Format.ogg);
+                    output.Seek(0, SeekOrigin.Begin);
+
+                    System.IO.File.Delete(outputPath + "\\" + directoryName + " - " + counterString + " " + cuts[i].Name + ".mp4");
+
                 }
                 counter++;
                 i++;
@@ -341,16 +380,17 @@ namespace BeatSaver1
             string[] files = Directory.GetFiles(File.Text);
 
             string ogg = GetOgg(files);
-            string chart = GetChart(files, "Expert");
+            string chart = GetChart(files, chartTypes.SelectedValue.ToString());
             string info = GetInfo(files);
             string directoryName = new DirectoryInfo(File.Text).Name;
             var json = System.IO.File.ReadAllText(chart);
-            CreateChart(json, directoryName, ogg);
+            await CreateChartAsync(json, directoryName, ogg);
             vlc = new LibVLC.NET.MediaPlayer();
             Sections.Items.Clear();
             cuts.Clear();
             Play.IsEnabled = false;
             Cut.IsEnabled = false;
+            speedCombo.IsEnabled = false;
             output_Copy.IsEnabled = false;
             Pause.IsEnabled = false;
             Stop.IsEnabled = false;
@@ -456,12 +496,13 @@ namespace BeatSaver1
             }
 
 
-            Sections.Items.Add(output_Copy.Text + " - " + ts.Minutes.ToString() + ":" + secondsVal + "/" + ts2.Minutes.ToString() + ":" + secondsVal2);
+            Sections.Items.Add(output_Copy.Text + " - " + ts.Minutes.ToString() + ":" + secondsVal + "/" + ts2.Minutes.ToString() + ":" + secondsVal2 + " - " + speedCombo.SelectedValue.ToString());
             Create.IsEnabled = true;
             CutEntity c = new CutEntity();
             c.StartTime = section1;
             c.EndTime = section2;
             c.Name = output_Copy.Text;
+            c.speed = double.Parse(speedCombo.SelectedValue.ToString().Remove(speedCombo.SelectedValue.ToString().Count() - 1));
             cuts.Add(c);
             section1 = section2;
             foreach (CutEntity c2 in cuts)
@@ -469,10 +510,12 @@ namespace BeatSaver1
                 if (c2.Name == output_Copy.Text)
                 {
                     Cut.IsEnabled = false;
+                    speedCombo.IsEnabled = false;
                 }
                 else
                 {
                     Cut.IsEnabled = true;
+                    speedCombo.IsEnabled = true;
                 }
             }
         }
@@ -575,6 +618,7 @@ namespace BeatSaver1
                 Pause.IsEnabled = true;
                 Stop.IsEnabled = true;
                 Cut.IsEnabled = false;
+                speedCombo.IsEnabled = false;
                 output_Copy1.IsEnabled = true;
                 Sections.IsEnabled = true;
                 output_Copy.IsEnabled = true;
@@ -595,20 +639,24 @@ namespace BeatSaver1
             if (output_Copy.Text == "")
             {
                 Cut.IsEnabled = false;
+                speedCombo.IsEnabled = false;
             }
             else
             {
                 Cut.IsEnabled = true;
+                speedCombo.IsEnabled = true;
             }
             foreach (CutEntity c in cuts)
             {
                 if (c.Name == output_Copy.Text)
                 {
                     Cut.IsEnabled = false;
+                    speedCombo.IsEnabled = false;
                 }
                 else
                 {
                     Cut.IsEnabled = true;
+                    speedCombo.IsEnabled = true;
                 }
             }
         }
@@ -616,6 +664,7 @@ namespace BeatSaver1
         {
             CheckCriteriaForEnable();
         }
+
         private void output_Copy_PreviewTextInput(object sender, System.Windows.Input.TextCompositionEventArgs e)
         {
             char[] invalids = Path.GetInvalidFileNameChars();
@@ -638,7 +687,7 @@ namespace BeatSaver1
         private static extern bool IsWow64Process(
         [In] IntPtr hProcess,
         [Out] out bool wow64Process
-    );  
+    );
     }
 
 }
