@@ -680,7 +680,7 @@ namespace BeatSaver1
 
         private void Cut_Copy_Click(object sender, RoutedEventArgs e)
         {
-            System.Diagnostics.Process.Start("https://www.paypal.me/demarini71691");
+            System.Diagnostics.Process.Start("https://streamlabs.com/dem716");
         }
         [DllImport("kernel32.dll", SetLastError = true, CallingConvention = CallingConvention.Winapi)]
         [return: MarshalAs(UnmanagedType.Bool)]
