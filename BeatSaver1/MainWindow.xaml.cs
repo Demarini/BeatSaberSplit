@@ -216,7 +216,7 @@ namespace BeatSaver1
                 decimal conversionNum = decimal.Divide(bsE._beatsPerMinute, 60);
                 foreach (EventsEntity e2 in bsE._events)
                 {
-                    if ((e2._time / conversionNum) >= int.Parse(start) - 1 && (e2._time / conversionNum) <= int.Parse(end) + 1)
+                    if ((e2._time / conversionNum) / Convert.ToDecimal(cuts[i].speed) >= int.Parse(start) - 1 && (e2._time / conversionNum) / Convert.ToDecimal(cuts[i].speed) <= int.Parse(end) + 1)
                     {
                         //e2._time = e2._time * Convert.ToDecimal(cuts[i].speed);
                         _truncatedEvents.Add(e2);
@@ -226,11 +226,11 @@ namespace BeatSaver1
                 {
                     if (decimal.Parse(start) > 1)
                     {
-                        e3._time = Math.Round(e3._time - (decimal.Parse(start) - 1) * conversionNum + (conversionNum * 2), 2) * Convert.ToDecimal(cuts[i].speed);
+                        e3._time = Math.Round(e3._time - (decimal.Parse(start) - 1) * conversionNum + (conversionNum * 2), 2) / Convert.ToDecimal(cuts[i].speed);
                     }
                     else
                     {
-                        e3._time = Math.Round(e3._time - (decimal.Parse(start)) * conversionNum, 2) * Convert.ToDecimal(cuts[i].speed);
+                        e3._time = Math.Round(e3._time - (decimal.Parse(start)) * conversionNum, 2) / Convert.ToDecimal(cuts[i].speed);
                     }
 
                 }
@@ -245,11 +245,11 @@ namespace BeatSaver1
                 {
                     if (decimal.Parse(start) > 1)
                     {
-                        n3._time = Math.Round(n3._time - (decimal.Parse(start) - 1) * conversionNum + (conversionNum * 2), 2) * Convert.ToDecimal(cuts[i].speed);
+                        n3._time = Math.Round(n3._time - (decimal.Parse(start) - 1) * conversionNum + (conversionNum * 2), 2) / Convert.ToDecimal(cuts[i].speed);
                     }
                     else
                     {
-                        n3._time = Math.Round(n3._time - (decimal.Parse(start)) * conversionNum, 2) * Convert.ToDecimal(cuts[i].speed);
+                        n3._time = Math.Round(n3._time - (decimal.Parse(start)) * conversionNum, 2) / Convert.ToDecimal(cuts[i].speed);
                     }
 
                 }
@@ -264,11 +264,11 @@ namespace BeatSaver1
                 {
                     if (decimal.Parse(start) > 1)
                     {
-                        o3._time = Math.Round(o3._time - (decimal.Parse(start) - 1) * conversionNum + (conversionNum * 2), 2) * Convert.ToDecimal(cuts[i].speed);
+                        o3._time = Math.Round(o3._time - (decimal.Parse(start) - 1) * conversionNum + (conversionNum * 2), 2) / Convert.ToDecimal(cuts[i].speed);
                     }
                     else
                     {
-                        o3._time = Math.Round(o3._time - (decimal.Parse(start)) * conversionNum, 2) * Convert.ToDecimal(cuts[i].speed);
+                        o3._time = Math.Round(o3._time - (decimal.Parse(start)) * conversionNum, 2) / Convert.ToDecimal(cuts[i].speed);
                     }
 
                 }
